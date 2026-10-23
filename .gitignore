@@ -4,3 +4,4 @@ data/*.tmp
 data/facebook-import/*.json
 !data/facebook-import/example.json.sample
 .env
+dist/

@@ -1,15 +1,12 @@
 import express from "express";
-import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { root, loadConfig } from "./config.js";
 import { Store, itemId } from "./store.js";
 import { Pipeline } from "./pipeline.js";
+import { feedPayload } from "./feed.js";
 import { demoStore } from "./demo-data.js";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const config = JSON.parse(fs.readFileSync(path.join(root, "config/sources.json"), "utf8"));
-config.facebook.importDir = path.resolve(root, config.facebook.importDir);
-
+const config = loadConfig();
 const DEMO = process.env.DEMO === "1";
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -21,20 +18,8 @@ const app = express();
 app.use(express.json({ limit: "20kb" }));
 app.use(express.static(path.join(root, "public")));
 
-app.get("/api/feed", (req, res) => {
-  const items = store
-    .all()
-    .filter((i) => !i.ai || i.ai.localScore >= Number(req.query.minLocal ?? 0))
-    .slice(0, 300);
-  res.json({
-    location: config.location,
-    demo: DEMO,
-    lastRefresh: store.data.lastRefresh,
-    refreshing: Boolean(pipeline.running),
-    digest: store.data.digest,
-    sources: store.data.sources,
-    items,
-  });
+app.get("/api/feed", (_req, res) => {
+  res.json(feedPayload(store, config, { demo: DEMO, refreshing: Boolean(pipeline.running) }));
 });
 
 app.post("/api/refresh", async (_req, res) => {

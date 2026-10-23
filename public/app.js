@@ -12,6 +12,7 @@ const CATEGORY_LABELS = {
 const SOURCE_LABELS = { rss: "Nyhet", facebook: "Facebook", tips: "Lesertips" };
 
 const $ = (id) => document.getElementById(id);
+const STATIC = "static" in document.documentElement.dataset;
 const state = { data: null, category: "all" };
 
 function el(tag, props = {}, ...children) {
@@ -33,7 +34,7 @@ function timeAgo(iso) {
 }
 
 async function load() {
-  const res = await fetch("/api/feed");
+  const res = await fetch(STATIC ? "feed.json" : "api/feed", { cache: "no-store" });
   state.data = await res.json();
   render();
 }
@@ -65,12 +66,18 @@ function render() {
   $("place").textContent = `· ${d.location.name}`;
   document.title = `Nabonytt · ${d.location.name}`;
   $("demo-banner").hidden = !d.demo;
+  if (STATIC && d.demo) {
+    $("demo-banner").textContent =
+      "Demo: dette er oppdiktede eksempelsaker. Legg til ANTHROPIC_API_KEY som secret i GitHub-repoet for ekte nyheter.";
+  }
   $("status").textContent = d.refreshing
     ? "Henter og oppsummerer nye saker…"
     : d.lastRefresh
       ? `Oppdatert ${timeAgo(d.lastRefresh)} · ${d.items.length} saker`
       : "Henter saker for første gang…";
   $("refresh").disabled = d.refreshing;
+  $("refresh").hidden = STATIC;
+  $("tips").hidden = STATIC;
 
   renderDigest(d);
   const { list, counts } = visibleItems();
@@ -174,7 +181,7 @@ $("refresh").addEventListener("click", async () => {
   $("refresh").disabled = true;
   $("status").textContent = "Henter og oppsummerer nye saker…";
   try {
-    await fetch("/api/refresh", { method: "POST" });
+    await fetch("api/refresh", { method: "POST" });
   } finally {
     await load();
   }
@@ -188,7 +195,7 @@ $("tip-form").addEventListener("submit", async (e) => {
   btn.disabled = true;
   $("tip-msg").textContent = "Oppsummerer…";
   try {
-    const res = await fetch("/api/tips", {
+    const res = await fetch("api/tips", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(Object.fromEntries(new FormData(form))),

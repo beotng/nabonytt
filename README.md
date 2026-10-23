@@ -25,6 +25,24 @@ The server fetches all sources on startup and again every `refreshMinutes` (30 b
 | `PORT` | Default `3000` |
 | `DEMO=1` | Use sample data, no API calls |
 
+## Publish on GitHub Pages
+
+GitHub Pages only serves static files, so the Pages version is rebuilt by GitHub Actions (`.github/workflows/pages.yml`). Every hour, and on each push to `main`, the workflow:
+
+1. fetches all feeds;
+2. summarises new items with Claude;
+3. publishes the site with the feed as `feed.json`.
+
+Summaries are kept between runs in the Actions cache, so each item is only summarised once.
+
+1. In the repo, go to **Settings → Pages → Source** and choose **GitHub Actions**.
+2. Under **Settings → Secrets and variables → Actions**:
+   - add the secret `ANTHROPIC_API_KEY`. Without it, the site deploys with demo data.
+   - optionally add the secret `FB_ACCESS_TOKEN` and the variable `CLAUDE_MODEL`.
+3. Run the workflow from the **Actions** tab, or push to `main`.
+
+The static site has no "Oppdater" button and no "Tips oss" form, since those need the server. Community posts appear only as their AI summary; the raw post text is not published. Don't commit Facebook exports to a public repo: `data/facebook-import/*.json` is git-ignored for that reason. To use the tips form, run the Node server instead (see "Run it").
+
 ## Sources
 
 Edit `config/sources.json` to change the town, the nearby place names that count as local, and the feeds.
@@ -45,6 +63,7 @@ Posts in community groups are written by private people. The prompt tells Claude
 ```
 src/
   server.js          Express API + static frontend, refresh timer
+  feed.js            the JSON the frontend renders (also used for the static build)
   pipeline.js        fetch all sources → store new items → summarise → digest
   ai.js              Claude calls (structured JSON output, batches of 12)
   sources/rss.js     RSS/Atom via rss-parser
@@ -52,6 +71,7 @@ src/
   store.js           JSON-file store
   demo-data.js       sample data for DEMO=1
 public/              vanilla HTML/CSS/JS frontend
+scripts/build-static.js  one refresh → dist/ for GitHub Pages
 ```
 
 - `GET /api/feed`: items, digest and source status.
