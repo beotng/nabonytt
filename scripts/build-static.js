@@ -29,3 +29,18 @@ fs.writeFileSync(path.join(dist, "feed.json"), JSON.stringify(feedPayload(store,
 const indexPath = path.join(dist, "index.html");
 fs.writeFileSync(indexPath, fs.readFileSync(indexPath, "utf8").replace('<html lang="no">', '<html lang="no" data-static>'));
 console.log(`Wrote ${dist}`);
+
+// Surface the result as annotations on the Actions run page.
+if (process.env.GITHUB_ACTIONS) {
+  const items = store.all();
+  const summarised = items.filter((i) => i.ai).length;
+  console.log(
+    `::notice title=Nabonytt::${demo ? "DEMO data. " : ""}${items.length} items, ${summarised} summarised, digest: ${store.data.digest ? "yes" : "no"}`,
+  );
+  for (const [name, s] of Object.entries(store.data.sources)) {
+    if (!s.ok) console.log(`::warning title=Source failed: ${name}::${s.error}`);
+  }
+  if (!demo && items.length > 0 && summarised === 0) {
+    console.log("::warning title=No AI summaries::Check the ANTHROPIC_API_KEY secret and your credit balance");
+  }
+}
