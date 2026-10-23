@@ -46,3 +46,6 @@ if (process.env.GITHUB_ACTIONS) {
     console.log("::warning title=No AI summaries::Check the ANTHROPIC_API_KEY secret and your credit balance");
   }
 }
+
+// Exit even if a slow source left a connection open.
+process.exit(0);

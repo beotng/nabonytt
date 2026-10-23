@@ -4,8 +4,18 @@ import { summarizeItems, buildDigest, findSameStories } from "./ai.js";
 
 const MAX_SUMMARIES_PER_REFRESH = 72;
 const MAX_ATTEMPTS = 3;
+const SOURCE_TIMEOUT_MS = 30_000;
 const DEDUPE_WINDOW_MS = 3 * 86_400_000;
 const DEDUPE_MAX_ITEMS = 150;
+
+/** Rejects if a source takes too long, so one slow site can't stall a refresh. */
+function withTimeout(promise, ms) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`timed out after ${ms / 1000}s`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 /** Which copy of a story to show: a direct feed over an aggregator, then the earliest. */
 function pickPrimary(items) {
@@ -58,7 +68,7 @@ export class Pipeline {
       { name: "Facebook-import", type: "facebook", run: async () => loadFacebookImports(config.facebook.importDir) },
     ];
 
-    const results = await Promise.allSettled(jobs.map((j) => j.run()));
+    const results = await Promise.allSettled(jobs.map((j) => withTimeout(j.run(), SOURCE_TIMEOUT_MS)));
     let added = 0;
     results.forEach((r, i) => {
       const { name, type } = jobs[i];

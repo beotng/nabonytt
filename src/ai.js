@@ -46,7 +46,7 @@ const StoryGroupsSchema = z.object({
 });
 
 let client;
-const getClient = () => (client ??= new Anthropic());
+const getClient = () => (client ??= new Anthropic({ timeout: 120_000, maxRetries: 2 }));
 
 function systemPrompt(location) {
   return `You write a local news feed for people living in ${location.name}, ${location.region}. Nearby places that count as local: ${location.nearby.join(", ")}.
