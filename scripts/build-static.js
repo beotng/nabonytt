@@ -39,6 +39,8 @@ if (process.env.GITHUB_ACTIONS) {
   console.log(
     `::notice title=Nabonytt::${demo ? "DEMO data. " : ""}${items.length} items, ${summarised} summarised, ${feed.items.length} stories shown after folding duplicates, digest: ${store.data.digest ? "yes" : "no"}`,
   );
+  const counts = Object.entries(store.data.sources).map(([name, s]) => `${name}: ${s.ok ? s.count : "failed"}`);
+  console.log(`::notice title=Sources::${counts.join(", ")}`);
   for (const [name, s] of Object.entries(store.data.sources)) {
     if (!s.ok) console.log(`::warning title=Source failed: ${name}::${s.error}`);
   }

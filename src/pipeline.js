@@ -70,6 +70,7 @@ export class Pipeline {
 
     const results = await Promise.allSettled(jobs.map((j) => withTimeout(j.run(), SOURCE_TIMEOUT_MS)));
     let added = 0;
+    store.data.sources = {};
     results.forEach((r, i) => {
       const { name, type } = jobs[i];
       const at = new Date().toISOString();
