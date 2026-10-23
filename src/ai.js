@@ -4,6 +4,11 @@ import { z } from "zod";
 
 const MODEL = process.env.CLAUDE_MODEL || "claude-opus-5-5";
 const BATCH_SIZE = 12;
+// Server-side refusal fallbacks are only accepted on these models (not Haiku).
+const FALLBACK_MODELS = new Set(["claude-opus-5-5", "claude-opus-5", "claude-fable-5-1", "claude-sonnet-5-5"]);
+const fallbackParams = FALLBACK_MODELS.has(MODEL)
+  ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" }
+  : {};
 
 export const CATEGORIES = [
   "news",
@@ -61,8 +66,7 @@ async function structured(schema, system, content, effort) {
   const message = await getClient().beta.messages.parse({
     model: MODEL,
     max_tokens: 16000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
+    ...fallbackParams,
     output_config: { effort, format: betaZodOutputFormat(schema) },
     system,
     messages: [{ role: "user", content }],
