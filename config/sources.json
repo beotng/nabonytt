@@ -3,7 +3,18 @@
     "name": "Alta",
     "region": "Finnmark",
     "language": "norsk bokmål",
-    "nearby": ["Bossekop", "Elvebakken", "Kaiskuru", "Saga", "Tverrelvdalen", "Kåfjord", "Talvik", "Rafsbotn", "Kvalsund", "Komsa"]
+    "nearby": [
+      "Bossekop",
+      "Elvebakken",
+      "Kaiskuru",
+      "Saga",
+      "Tverrelvdalen",
+      "Kåfjord",
+      "Talvik",
+      "Rafsbotn",
+      "Kvalsund",
+      "Komsa"
+    ]
   },
   "refreshMinutes": 30,
   "rss": [
@@ -18,6 +29,10 @@
     {
       "name": "Altaposten",
       "url": "https://www.altaposten.no/rss"
+    },
+    {
+      "name": "Kronstadposten",
+      "url": "https://www.kronstadposten.no/rss"
     }
   ],
   "facebook": {

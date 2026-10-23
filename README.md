@@ -47,7 +47,7 @@ The static site has no "Oppdater" button and no "Tips oss" form, since those nee
 
 Edit `config/sources.json` to change the town, the nearby place names that count as local, and the feeds.
 
-**News (RSS).** Ships with a Google News search for "Alta Finnmark", NRK Troms og Finnmark and Altaposten. Any RSS/Atom URL works. If a feed URL is wrong or blocked, it shows up red under "Kilder" at the bottom of the page and the other sources keep working. NRK covers the whole county, so Claude's `localScore` filters out stories that aren't about Alta when "Bare lokale saker" is ticked.
+**News (RSS).** Ships with a Google News search for "Alta Finnmark", NRK Troms og Finnmark, Altaposten and Kronstadposten. Any RSS/Atom URL works. If a feed URL is wrong or blocked, it shows up red under "Kilder" at the bottom of the page and the other sources keep working. NRK covers the whole county, so Claude's `localScore` filters out stories that aren't about Alta when "Bare lokale saker" is ticked.
 
 **Facebook.** Facebook does not offer a way to read groups automatically: the Groups API was shut down in 2024, and scraping breaks Facebook's terms. So:
 
