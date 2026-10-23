@@ -31,8 +31,12 @@
       "url": "https://www.altaposten.no/rss"
     },
     {
+      "name": "Kronstadposten",
+      "url": "https://www.kp.no/rss"
+    },
+    {
       "name": "Google Nyheter: Kronstadposten",
-      "url": "https://news.google.com/rss/search?q=site:kronstadposten.no&hl=no&gl=NO&ceid=NO:no"
+      "url": "https://news.google.com/rss/search?q=site:kp.no&hl=no&gl=NO&ceid=NO:no"
     }
   ],
   "facebook": {
