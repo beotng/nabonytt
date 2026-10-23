@@ -132,6 +132,8 @@ input[type="search"] { flex: 1; min-width: 160px; }
 .tag { padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .tag.fun { background: var(--fun-soft); color: var(--fun); }
 .meta a { color: var(--accent); }
+.also { font-size: 0.82rem; color: var(--muted); }
+.also a { color: var(--accent); }
 .raw { font-size: 0.9rem; color: var(--muted); }
 
 .empty { text-align: center; color: var(--muted); padding: 40px 0; }

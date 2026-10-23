@@ -10,11 +10,22 @@ const parser = new Parser({
 const stripHtml = (s = "") =>
   s.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 
+/**
+ * Google News titles look like "Headline - Altaposten". Split off the outlet
+ * so the item is credited to it, and mark it as coming via the aggregator.
+ */
+export function splitAggregatorTitle(item) {
+  if (!/google/i.test(item.source)) return item;
+  const m = item.title.match(/^(.*\S)\s+[-–]\s+([^-–]+)$/);
+  if (!m) return { ...item, via: item.source };
+  return { ...item, title: m[1], source: m[2].trim(), via: item.source };
+}
+
 export async function fetchRss(feed) {
   const parsed = await parser.parseURL(feed.url);
   return parsed.items.slice(0, 40).map((entry) => {
     const url = entry.link ?? entry.guid ?? "";
-    return {
+    return splitAggregatorTitle({
       id: itemId("rss", url || entry.title),
       sourceType: "rss",
       source: feed.name,
@@ -23,6 +34,6 @@ export async function fetchRss(feed) {
       url,
       image: entry.enclosure?.url ?? entry.media?.$?.url ?? null,
       publishedAt: new Date(entry.isoDate || entry.pubDate || Date.now()).toISOString(),
-    };
+    });
   });
 }

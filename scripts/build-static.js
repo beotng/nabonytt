@@ -24,7 +24,9 @@ if (demo) {
 const dist = path.join(root, "dist");
 fs.rmSync(dist, { recursive: true, force: true });
 fs.cpSync(path.join(root, "public"), dist, { recursive: true });
-fs.writeFileSync(path.join(dist, "feed.json"), JSON.stringify(feedPayload(store, config, { demo, publicOnly: true })));
+
+const feed = feedPayload(store, config, { demo, publicOnly: true });
+fs.writeFileSync(path.join(dist, "feed.json"), JSON.stringify(feed));
 
 const indexPath = path.join(dist, "index.html");
 fs.writeFileSync(indexPath, fs.readFileSync(indexPath, "utf8").replace('<html lang="no">', '<html lang="no" data-static>'));
@@ -35,7 +37,7 @@ if (process.env.GITHUB_ACTIONS) {
   const items = store.all();
   const summarised = items.filter((i) => i.ai).length;
   console.log(
-    `::notice title=Nabonytt::${demo ? "DEMO data. " : ""}${items.length} items, ${summarised} summarised, digest: ${store.data.digest ? "yes" : "no"}`,
+    `::notice title=Nabonytt::${demo ? "DEMO data. " : ""}${items.length} items, ${summarised} summarised, ${feed.items.length} stories shown after folding duplicates, digest: ${store.data.digest ? "yes" : "no"}`,
   );
   for (const [name, s] of Object.entries(store.data.sources)) {
     if (!s.ok) console.log(`::warning title=Source failed: ${name}::${s.error}`);

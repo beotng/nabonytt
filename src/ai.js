@@ -41,6 +41,10 @@ const DigestSchema = z.object({
   highlights: z.array(z.object({ id: z.string(), line: z.string() })),
 });
 
+const StoryGroupsSchema = z.object({
+  groups: z.array(z.object({ ids: z.array(z.string()) })),
+});
+
 let client;
 const getClient = () => (client ??= new Anthropic());
 
@@ -123,10 +127,27 @@ export async function summarizeItems(items, location, { onBatch } = {}) {
   return results;
 }
 
+/** Groups items that report the same story (e.g. one event covered by several outlets). */
+export async function findSameStories(items, location) {
+  const list = items.map((i) => ({ id: i.id, source: i.source, published: i.publishedAt, headline: i.ai.headline, summary: i.ai.summary }));
+  const out = await structured(
+    StoryGroupsSchema,
+    systemPrompt(location),
+    `Below are recent items from several news outlets and community pages. Several outlets often cover the same event, and the same article can appear twice.
+
+Group together items that report the same story: the same event, incident, decision or announcement. Follow-up articles with genuinely new developments, or different events on a similar topic, are separate stories. Return only groups of two or more items; leave out items that are unique.
+
+${JSON.stringify(list, null, 2)}`,
+    "low",
+  );
+  const known = new Set(list.map((l) => l.id));
+  return out.groups.map((g) => [...new Set(g.ids.filter((id) => known.has(id)))]).filter((g) => g.length > 1);
+}
+
 /** A short, upbeat overview of the most interesting recent items. */
 export async function buildDigest(items, location) {
   const recent = items
-    .filter((i) => i.ai && Date.now() - new Date(i.publishedAt) < 2 * 86_400_000)
+    .filter((i) => i.ai && !i.dupOf && Date.now() - new Date(i.publishedAt) < 2 * 86_400_000)
     .sort((a, b) => b.ai.localScore + b.ai.funScore - (a.ai.localScore + a.ai.funScore))
     .slice(0, 25)
     .map((i) => ({ id: i.id, category: i.ai.category, headline: i.ai.headline, summary: i.ai.summary }));

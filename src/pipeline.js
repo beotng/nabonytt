@@ -1,9 +1,34 @@
-import { fetchRss } from "./sources/rss.js";
+import { fetchRss, splitAggregatorTitle } from "./sources/rss.js";
 import { fetchFacebookPage, loadFacebookImports } from "./sources/facebook.js";
-import { summarizeItems, buildDigest } from "./ai.js";
+import { summarizeItems, buildDigest, findSameStories } from "./ai.js";
 
 const MAX_SUMMARIES_PER_REFRESH = 72;
 const MAX_ATTEMPTS = 3;
+const DEDUPE_WINDOW_MS = 3 * 86_400_000;
+const DEDUPE_MAX_ITEMS = 150;
+
+/** Which copy of a story to show: a direct feed over an aggregator, then the earliest. */
+function pickPrimary(items) {
+  return [...items].sort(
+    (a, b) => Boolean(a.via) - Boolean(b.via) || new Date(a.publishedAt) - new Date(b.publishedAt),
+  )[0];
+}
+
+/** Merges groups that share an item, so each item ends up in at most one group. */
+function mergeGroups(groups) {
+  const merged = [];
+  for (const ids of groups) {
+    const set = new Set(ids);
+    for (let i = merged.length - 1; i >= 0; i--) {
+      if ([...merged[i]].some((id) => set.has(id))) {
+        for (const id of merged[i]) set.add(id);
+        merged.splice(i, 1);
+      }
+    }
+    merged.push(set);
+  }
+  return merged.map((s) => [...s]);
+}
 
 export class Pipeline {
   constructor(store, config) {
@@ -46,11 +71,14 @@ export class Pipeline {
         console.warn(`[fetch] ${name}: ${r.reason?.message}`);
       }
     });
+    // Items stored before aggregator titles were split get the same treatment.
+    for (const item of store.all()) if (item.sourceType === "rss" && !item.via) Object.assign(item, splitAggregatorTitle(item));
     store.prune();
     store.save();
     console.log(`[fetch] ${added} new items`);
 
     const summarized = await this.summarizePending();
+    if (summarized > 0 || !store.data.dedupedAt) await this.dedupe();
     if (summarized > 0 || !store.data.digest) {
       try {
         const digest = await buildDigest(store.all(), config.location);
@@ -90,5 +118,32 @@ export class Pipeline {
     store.save();
     console.log(`[ai] summarised ${results.size}/${pending.length}`);
     return results.size;
+  }
+
+  /** Marks items that repeat a story already in the feed with `dupOf`. */
+  async dedupe() {
+    const { store } = this;
+    const recent = store
+      .all()
+      .filter((i) => i.ai && Date.now() - new Date(i.publishedAt) < DEDUPE_WINDOW_MS)
+      .slice(0, DEDUPE_MAX_ITEMS);
+    if (recent.length < 2) return;
+
+    let groups;
+    try {
+      groups = await findSameStories(recent, this.config.location);
+    } catch (err) {
+      console.error(`[ai] dedupe: ${err.message}`);
+      return;
+    }
+    for (const item of recent) delete store.data.items[item.id].dupOf;
+    groups = mergeGroups(groups);
+    for (const ids of groups) {
+      const primary = pickPrimary(ids.map((id) => store.data.items[id]));
+      for (const id of ids) if (id !== primary.id) store.data.items[id].dupOf = primary.id;
+    }
+    store.data.dedupedAt = new Date().toISOString();
+    store.save();
+    console.log(`[ai] ${groups.length} stories covered more than once`);
   }
 }

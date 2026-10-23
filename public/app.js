@@ -144,6 +144,7 @@ function card(item) {
     ai && ai.funScore >= 7 ? el("span", { title: "Morsomhetsfaktor", textContent: `😂 ${ai.funScore}/10` }) : null,
     url ? el("a", { href: url, target: "_blank", rel: "noopener noreferrer", textContent: "Les original →" }) : null,
   );
+  const also = alsoIn(item);
 
   if (!ai) {
     return el(
@@ -152,6 +153,7 @@ function card(item) {
       el("div", { className: "head" }, el("span", { className: "emoji", textContent: "⏳" }), el("h3", { textContent: item.title || "Venter på oppsummering" })),
       el("p", { className: "raw", textContent: item.text.slice(0, 280) + (item.text.length > 280 ? "…" : "") }),
       meta,
+      also,
     );
   }
   return el(
@@ -160,7 +162,21 @@ function card(item) {
     el("div", { className: "head" }, el("span", { className: "emoji", textContent: ai.emoji }), el("h3", { textContent: ai.headline })),
     el("p", { textContent: ai.summary }),
     meta,
+    also,
   );
+}
+
+/** "Også omtalt av: NRK, iFinnmark" for stories several outlets covered. */
+function alsoIn(item) {
+  const seen = new Set([item.source]);
+  const others = (item.alsoIn ?? []).filter((o) => !seen.has(o.source) && seen.add(o.source));
+  if (others.length === 0) return null;
+  const parts = others.flatMap((o, n) => {
+    const url = safeUrl(o.url);
+    const link = url ? el("a", { href: url, target: "_blank", rel: "noopener noreferrer", textContent: o.source }) : o.source;
+    return n === 0 ? [link] : [", ", link];
+  });
+  return el("p", { className: "also" }, "Også omtalt av: ", ...parts);
 }
 
 function renderSources(sources) {
