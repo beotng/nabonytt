@@ -1,0 +1,10 @@
+{
+  "source": "Oppslagstavla i Alta",
+  "posts": [
+    {
+      "text": "Paste the text of a post here. Rename this file to something.json to import it.",
+      "url": "https://www.facebook.com/groups/.../posts/...",
+      "time": "2026-10-23T08:15:00Z"
+    }
+  ]
+}

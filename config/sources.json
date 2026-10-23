@@ -1,0 +1,28 @@
+{
+  "location": {
+    "name": "Alta",
+    "region": "Finnmark",
+    "language": "norsk bokmål",
+    "nearby": ["Bossekop", "Elvebakken", "Kaiskuru", "Saga", "Tverrelvdalen", "Kåfjord", "Talvik", "Rafsbotn", "Kvalsund", "Komsa"]
+  },
+  "refreshMinutes": 30,
+  "rss": [
+    {
+      "name": "Google Nyheter: Alta",
+      "url": "https://news.google.com/rss/search?q=Alta%20Finnmark&hl=no&gl=NO&ceid=NO:no"
+    },
+    {
+      "name": "NRK Troms og Finnmark",
+      "url": "https://www.nrk.no/tromsogfinnmark/toppsaker.rss"
+    },
+    {
+      "name": "Altaposten",
+      "url": "https://www.altaposten.no/rss"
+    }
+  ],
+  "facebook": {
+    "pages": [],
+    "importDir": "data/facebook-import",
+    "_note": "pages: [{ \"name\": \"Alta kommune\", \"id\": \"<page id or username>\" }] needs FB_ACCESS_TOKEN. Facebook groups such as 'Oppslagstavla i Alta' cannot be read through the Graph API; drop exported posts as JSON into importDir or use the 'Tips' form in the app."
+  }
+}

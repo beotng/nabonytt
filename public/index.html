@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nabonytt</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌌</text></svg>" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <div>
+        <h1>Nabonytt <span id="place" class="place"></span></h1>
+        <p class="sub" id="status">Laster…</p>
+      </div>
+      <button id="refresh" class="btn">Oppdater</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="demo-banner" class="banner" hidden>
+      Demo-modus: dette er oppdiktede eksempelsaker. Start uten <code>DEMO=1</code> og med en API-nøkkel for ekte nyheter.
+    </div>
+
+    <section id="digest" class="digest" hidden>
+      <h2 id="digest-title"></h2>
+      <p id="digest-intro"></p>
+      <ul id="digest-highlights"></ul>
+    </section>
+
+    <section class="controls">
+      <div id="chips" class="chips" role="tablist"></div>
+      <div class="row">
+        <label>Sorter
+          <select id="sort">
+            <option value="new">Nyeste</option>
+            <option value="fun">Morsomste</option>
+            <option value="local">Mest lokalt</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="local-only" checked /> Bare lokale saker</label>
+        <input type="search" id="search" placeholder="Søk…" />
+      </div>
+    </section>
+
+    <section id="feed" class="feed" aria-live="polite"></section>
+    <p id="empty" class="empty" hidden>Ingen saker her ennå.</p>
+
+    <details class="tips">
+      <summary>📮 Tips oss: lim inn et innlegg fra Facebook</summary>
+      <p class="muted">Har du sett noe morsomt eller nyttig på Oppslagstavla eller en annen lokal gruppe? Lim inn teksten, så lager AI-en en kort oppsummering uten navn på privatpersoner.</p>
+      <form id="tip-form">
+        <textarea name="text" rows="5" required minlength="15" maxlength="3000" placeholder="Lim inn innlegget her…"></textarea>
+        <div class="row">
+          <input name="source" placeholder="Kilde, f.eks. Oppslagstavla i Alta" maxlength="80" />
+          <input name="url" type="url" placeholder="Lenke (valgfritt)" />
+          <button class="btn" type="submit">Send inn</button>
+        </div>
+        <p id="tip-msg" class="muted" role="status"></p>
+      </form>
+    </details>
+  </main>
+
+  <footer class="wrap foot">
+    <h3>Kilder</h3>
+    <ul id="sources"></ul>
+    <p class="muted">Oppsummeringene er laget av AI og kan inneholde feil. Les originalen før du deler.</p>
+  </footer>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

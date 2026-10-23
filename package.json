@@ -1,0 +1,24 @@
+{
+  "name": "nabonytt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.js",
+    "demo": "DEMO=1 node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
+    "express": "^5.3.0",
+    "rss-parser": "^3.13.0",
+    "zod": "^4.6.7"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
